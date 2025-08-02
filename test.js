@@ -9,6 +9,10 @@ log('start');
 
 i = 0;
 
+Promise.resolve().then(() => {
+  log('Promise resolved');
+});
+
 setInterval(() => {
   if (i == 5) return;
   i++;

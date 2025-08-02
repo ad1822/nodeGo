@@ -29,6 +29,7 @@ func (r *JSRuntime) RunEventLoop() {
 			task()
 
 		default:
+			r.vm.RunString("")
 			time.Sleep(10 * time.Millisecond)
 
 		}

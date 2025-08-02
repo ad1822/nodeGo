@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: myjs <script.js>")
+		log.Fatal("Usage: go run main.go <script.js>")
 	}
 
 	jsrt := runtime.New()
