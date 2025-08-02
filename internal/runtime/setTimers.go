@@ -9,6 +9,12 @@ import (
 
 func (r *JSRuntime) initTimers() {
 	r.vm.Set("setTimeout", func(call goja.FunctionCall) goja.Value {
+		r.nextTimerId++
+		id := r.nextTimerId
+
+		r.activeTimers[id] = true
+
+		// fmt.Println("ID of setTimeout :", id)
 		if len(call.Arguments) < 2 {
 			panic(r.vm.ToValue("setTimeout expects a callback and delay"))
 		}
@@ -38,11 +44,18 @@ func (r *JSRuntime) initTimers() {
 			// fmt.Println("[Go] Callback pushed successfully")
 		}()
 
-		return goja.Undefined()
+		return r.vm.ToValue(id)
+
 	})
 
 	// Set Interval method in JS
 	r.vm.Set("setInterval", func(call goja.FunctionCall) goja.Value {
+		r.nextTimerId++
+		id := r.nextTimerId
+
+		r.activeTimers[id] = true
+
+		// fmt.Println("ID of setInterval :", id)
 		if len(call.Arguments) < 2 {
 			panic(r.vm.ToValue("setTimeout expects a callback and delay"))
 		}
@@ -71,7 +84,7 @@ func (r *JSRuntime) initTimers() {
 			}()
 		}
 
-		return goja.Undefined()
+		return r.vm.ToValue(id)
 	})
 
 }

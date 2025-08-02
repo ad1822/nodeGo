@@ -23,12 +23,16 @@ queueMicrotask(() => {
   log('microtask 1');
 });
 
-setTimeout(() => {
-  log('setTimeout 2');
+let id = setInterval(() => {
+  log('Interval');
+}, 1000);
 
-  queueMicrotask(() => {
-    log('microtask 2 (inside setTimeout 2)');
-  });
+let id2 = setTimeout(() => {
+  log('Timeout');
 }, 2000);
+
+// clearInterval(id);
+
+// clearTimeout(id2);
 
 log('end');
