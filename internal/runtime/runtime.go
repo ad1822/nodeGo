@@ -19,6 +19,7 @@ func (r *JSRuntime) RunEventLoop() {
 		case task := <-r.taskQueue:
 			// fmt.Println("Queue length:", len(r.taskQueue))
 			task()
+			// r.vm.RunString("")
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}
