@@ -15,6 +15,21 @@ func (r *JSRuntime) initConsole() {
 			fmt.Println()
 			return goja.Undefined()
 		},
+		"error": func(call goja.FunctionCall) goja.Value {
+			for _, arg := range call.Arguments {
+				fmt.Print("\033[31m[ERROR] ", arg.Export(), "\033[0m", " ")
+			}
+			fmt.Println()
+			return goja.Undefined()
+		},
+		"warn": func(call goja.FunctionCall) goja.Value {
+			for _, arg := range call.Arguments {
+				fmt.Print("\033[33m[WARN] ", arg.Export(), "\033[0m", "  ")
+
+			}
+			fmt.Println()
+			return goja.Undefined()
+		},
 	}
 	r.vm.Set("console", console)
 }
