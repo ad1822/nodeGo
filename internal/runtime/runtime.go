@@ -11,6 +11,7 @@ type JSRuntime struct {
 	vm             *goja.Runtime
 	taskQueue      chan func() // Chan is for channel
 	microTaskQueue chan func()
+	immediateQueue chan func()
 	nextTimerId    int
 	activeTimers   map[int]bool
 }
@@ -26,6 +27,9 @@ func (r *JSRuntime) RunEventLoop() {
 				micro := <-r.microTaskQueue
 				micro()
 			}
+
+		case immediateAction := <-r.immediateQueue:
+			immediateAction()
 
 		case task := <-r.taskQueue:
 			task()
@@ -44,11 +48,13 @@ func New() *JSRuntime {
 		vm:             goja.New(),
 		taskQueue:      make(chan func(), 100), // buffered task queue
 		microTaskQueue: make(chan func(), 100),
+		immediateQueue: make(chan func(), 100),
 		nextTimerId:    0,
 		activeTimers:   make(map[int]bool),
 	}
 	r.initConsole()
 	r.initTimers()
+	r.initImmediate()
 	r.initMicroTaskQueue()
 	// r.initClearTimers()
 	return r
