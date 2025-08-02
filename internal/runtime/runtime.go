@@ -8,32 +8,43 @@ import (
 )
 
 type JSRuntime struct {
-	vm        *goja.Runtime
-	taskQueue chan func() // Chan is for channel
+	vm             *goja.Runtime
+	taskQueue      chan func() // Chan is for channel
+	microTaskQueue chan func()
 }
 
 // Have to exist explicitly
 func (r *JSRuntime) RunEventLoop() {
 	for {
 		select {
+		case micro := <-r.microTaskQueue:
+			micro()
+
+			for len(r.microTaskQueue) > 0 {
+				micro := <-r.microTaskQueue
+				micro()
+			}
+
 		case task := <-r.taskQueue:
-			// fmt.Println("Queue length:", len(r.taskQueue))
 			task()
-			// r.vm.RunString("")
+
 		default:
 			time.Sleep(10 * time.Millisecond)
+
 		}
 	}
+
 }
 
 func New() *JSRuntime {
 	r := &JSRuntime{
-		vm:        goja.New(),
-		taskQueue: make(chan func(), 100), // buffered task queue
+		vm:             goja.New(),
+		taskQueue:      make(chan func(), 100), // buffered task queue
+		microTaskQueue: make(chan func(), 100),
 	}
 	r.initConsole()
 	r.initTimers()
-
+	r.initMicroTaskQueue()
 	return r
 }
 

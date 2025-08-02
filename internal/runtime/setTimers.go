@@ -25,17 +25,17 @@ func (r *JSRuntime) initTimers() {
 
 		go func() {
 			time.Sleep(time.Duration(delay) * time.Millisecond)
-			fmt.Println("[Go] Timeout finished, pushing callback to taskQueue")
+			// fmt.Println("[Go] Timeout finished, pushing callback to taskQueue")
 
 			r.taskQueue <- func() {
-				fmt.Println("[Go] Executing setTimeout callback from taskQueue")
+				// fmt.Println("[Go] Executing setTimeout callback from taskQueue")
 				_, err := cb(goja.Undefined())
 				if err != nil {
 					fmt.Println("[Go] Error in callback:", err)
 				}
 			}
 
-			fmt.Println("[Go] Callback pushed successfully")
+			// fmt.Println("[Go] Callback pushed successfully")
 		}()
 
 		return goja.Undefined()

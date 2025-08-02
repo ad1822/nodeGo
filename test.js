@@ -5,33 +5,26 @@ function log(msg) {
   console.log(`[+${elapsed}s] ${msg}`);
 }
 
-log('Start');
+log('start');
 
-let i = 0;
+i = 0;
+
 setInterval(() => {
+  if (i == 5) return;
   i++;
-
   log(`Interval ${i}`);
-}, 1000);
+}, 2000);
 
-// setTimeout(() => {
-//   log('After 10 second');
-// }, 10000);
-
-// setTimeout(() => {
-//   log('After 20 second');
-// }, 20000);
+queueMicrotask(() => {
+  log('microtask 1');
+});
 
 setTimeout(() => {
-  log('After 3 second');
-}, 3000);
+  log('setTimeout 2');
 
-// setTimeout(() => {
-//   log('After 2 second');
-// }, 2000);
+  queueMicrotask(() => {
+    log('microtask 2 (inside setTimeout 2)');
+  });
+}, 2000);
 
-// setTimeout(() => {
-//   log('After 1 second');
-// }, 1000);
-
-log('End');
+log('end');
