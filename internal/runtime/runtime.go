@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"os"
+	"time"
 
 	"github.com/dop251/goja"
 )
@@ -11,6 +12,19 @@ type JSRuntime struct {
 	taskQueue chan func() // Chan is for channel
 }
 
+// Have to exist explicitly
+func (r *JSRuntime) RunEventLoop() {
+	for {
+		select {
+		case task := <-r.taskQueue:
+			// fmt.Println("Queue length:", len(r.taskQueue))
+			task()
+		default:
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+}
+
 func New() *JSRuntime {
 	r := &JSRuntime{
 		vm:        goja.New(),
@@ -18,6 +32,7 @@ func New() *JSRuntime {
 	}
 	r.initConsole()
 	r.initTimers()
+
 	return r
 }
 

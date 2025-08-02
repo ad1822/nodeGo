@@ -44,17 +44,38 @@ func (r *JSRuntime) initTimers() {
 
 		return goja.Undefined()
 	})
-}
 
-// Have to exist explicitly
-func (r *JSRuntime) RunEventLoop() {
-	for {
-		select {
-		case task := <-r.taskQueue:
-			// fmt.Println("Queue length:", len(r.taskQueue))
-			task()
-		default:
-			time.Sleep(10 * time.Millisecond)
+	// Set Interval method in JS
+	r.vm.Set("setInterval", func(call goja.FunctionCall) goja.Value {
+		if len(call.Arguments) < 2 {
+			panic(r.vm.ToValue("setTimeout expects a callback and delay"))
 		}
-	}
+
+		cb := call.Argument(0)
+		delay := call.Argument(1).ToInteger()
+
+		if callable, ok := goja.AssertFunction(cb); ok {
+			go func() {
+				ticker := time.NewTicker(time.Duration(delay) * time.Millisecond)
+				defer ticker.Stop()
+
+				for {
+					select {
+					case <-ticker.C:
+						r.taskQueue <- func() {
+							_, err := callable(goja.Undefined())
+							if err != nil {
+								fmt.Println("setInterval error:", err)
+							}
+						}
+						// case <-r.done: // Optional shutdown support
+						// return
+					}
+				}
+			}()
+		}
+
+		return goja.Undefined()
+	})
+
 }
