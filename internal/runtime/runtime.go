@@ -7,6 +7,11 @@ import (
 	"github.com/dop251/goja"
 )
 
+type Module struct {
+	exports goja.Value
+	loaded  bool
+}
+
 type JSRuntime struct {
 	vm             *goja.Runtime
 	taskQueue      chan func() // Chan is for channel
@@ -15,6 +20,7 @@ type JSRuntime struct {
 	nextTickQueue  chan func()
 	nextTimerId    int
 	activeTimers   map[int]bool
+	moduleCache    map[string]*Module
 }
 
 // Have to exist explicitly
@@ -75,12 +81,14 @@ func New() *JSRuntime {
 		nextTickQueue:  make(chan func(), 100), // Next tick Queue for callbacks before microtask queue
 		nextTimerId:    0,
 		activeTimers:   make(map[int]bool),
+		moduleCache:    make(map[string]*Module),
 	}
 	r.initConsole()
 	r.initNextTickQueue()
 	r.initImmediate()
 	r.initMicroTaskQueue()
 	r.initTimers()
+	r.setupRequire()
 	// r.initClearTimers()
 	return r
 }

@@ -1,10 +1,4 @@
-const startTime = Date.now();
-
-function log(msg) {
-  const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-  console.log(`[+${elapsed}s] ${msg}`);
-}
-
+const log = require('./test/logger.js');
 // log('start');
 
 i = 0;
