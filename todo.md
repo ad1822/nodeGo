@@ -1,1 +1,3 @@
 - Go rountines and Channnles
+- How to stop go routines
+- Clean timeout and interval

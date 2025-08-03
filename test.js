@@ -5,19 +5,21 @@ function log(msg) {
   console.log(`[+${elapsed}s] ${msg}`);
 }
 
-log('start');
+// log('start');
 
 i = 0;
 
+setImmediate(() => console.warn('immediate'));
+
 Promise.resolve().then(() => {
-  log('Promise resolved');
+  console.error('Promise resolved');
 });
 
-setInterval(() => {
-  if (i == 5) return;
-  i++;
-  log(`Interval ${i}`);
-}, 2000);
+// setInterval(() => {
+//   if (i == 5) return;
+//   i++;
+//   console.warn(`Interval ${i}`);
+// }, 2000);
 
 queueMicrotask(() => {
   log('microtask 1');
@@ -27,12 +29,8 @@ let id = setInterval(() => {
   log('Interval');
 }, 1000);
 
-let id2 = setTimeout(() => {
-  log('Timeout');
-}, 2000);
+// let id2 = setTimeout(() => {
+//   log('Timeout');
+// }, 2000);
 
-// clearInterval(id);
-
-// clearTimeout(id2);
-
-log('end');
+// log('end');
