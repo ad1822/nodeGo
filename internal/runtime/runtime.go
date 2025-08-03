@@ -20,36 +20,50 @@ type JSRuntime struct {
 // Have to exist explicitly
 func (r *JSRuntime) RunEventLoop() {
 	for {
-		select {
-		case nextTick := <-r.nextTickQueue:
-			nextTick()
-
-			for len(r.nextTickQueue) > 0 {
-				nextTick := <-r.nextTickQueue
-				nextTick()
+		// Drain nextTick queue
+		for {
+			select {
+			case fn := <-r.nextTickQueue:
+				fn()
+			default:
+				goto drainMicrotasks
 			}
-
-		case micro := <-r.microTaskQueue:
-			micro()
-
-			for len(r.microTaskQueue) > 0 {
-				micro := <-r.microTaskQueue
-				micro()
-			}
-
-		case immediate := <-r.immediateQueue:
-			immediate()
-
-		case task := <-r.taskQueue:
-			task()
-
-		default:
-			r.vm.RunString("")
-			time.Sleep(10 * time.Millisecond)
-
 		}
-	}
 
+	drainMicrotasks:
+		for {
+			select {
+			case fn := <-r.microTaskQueue:
+				fn()
+			default:
+				goto drainImmediate
+			}
+		}
+
+	drainImmediate:
+		for {
+			select {
+			case fn := <-r.immediateQueue:
+				fn()
+			default:
+				goto drainTimers
+			}
+		}
+
+	drainTimers:
+		for {
+			select {
+			case fn := <-r.taskQueue:
+				fn()
+			default:
+				goto idle
+			}
+		}
+
+	idle:
+		// If all queues are empty, wait briefly
+		time.Sleep(1 * time.Millisecond)
+	}
 }
 
 func New() *JSRuntime {
