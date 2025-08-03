@@ -25,9 +25,17 @@ queueMicrotask(() => {
   log('microtask 1');
 });
 
+process.nextTick(() => {
+  console.warn('NEXT TICK 1');
+});
+
 let id = setInterval(() => {
   log('Interval');
 }, 1000);
+
+process.nextTick(() => {
+  console.warn('NEXT TICK 2');
+});
 
 // let id2 = setTimeout(() => {
 //   log('Timeout');

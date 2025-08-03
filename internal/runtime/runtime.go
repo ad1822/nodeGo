@@ -12,6 +12,7 @@ type JSRuntime struct {
 	taskQueue      chan func() // Chan is for channel
 	microTaskQueue chan func()
 	immediateQueue chan func()
+	nextTickQueue  chan func()
 	nextTimerId    int
 	activeTimers   map[int]bool
 }
@@ -20,6 +21,14 @@ type JSRuntime struct {
 func (r *JSRuntime) RunEventLoop() {
 	for {
 		select {
+		case nextTick := <-r.nextTickQueue:
+			nextTick()
+
+			for len(r.nextTickQueue) > 0 {
+				nextTick := <-r.nextTickQueue
+				nextTick()
+			}
+
 		case micro := <-r.microTaskQueue:
 			micro()
 
@@ -28,8 +37,8 @@ func (r *JSRuntime) RunEventLoop() {
 				micro()
 			}
 
-		case immediateAction := <-r.immediateQueue:
-			immediateAction()
+		case immediate := <-r.immediateQueue:
+			immediate()
 
 		case task := <-r.taskQueue:
 			task()
@@ -46,16 +55,18 @@ func (r *JSRuntime) RunEventLoop() {
 func New() *JSRuntime {
 	r := &JSRuntime{
 		vm:             goja.New(),
+		microTaskQueue: make(chan func(), 100), // Micro Task Queue for callbacks and Promises
+		immediateQueue: make(chan func(), 100), // Immediate Queue for callbacks before timers
 		taskQueue:      make(chan func(), 100), // buffered task queue
-		microTaskQueue: make(chan func(), 100),
-		immediateQueue: make(chan func(), 100),
+		nextTickQueue:  make(chan func(), 100), // Next tick Queue for callbacks before microtask queue
 		nextTimerId:    0,
 		activeTimers:   make(map[int]bool),
 	}
 	r.initConsole()
-	r.initTimers()
+	r.initNextTickQueue()
 	r.initImmediate()
 	r.initMicroTaskQueue()
+	r.initTimers()
 	// r.initClearTimers()
 	return r
 }
