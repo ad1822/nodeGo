@@ -89,6 +89,7 @@ func New() *JSRuntime {
 	r.initMicroTaskQueue()
 	r.initTimers()
 	r.setupRequire()
+	// r.setupFSModule()
 	// r.initClearTimers()
 	return r
 }

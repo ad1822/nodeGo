@@ -18,6 +18,61 @@ func (r *JSRuntime) setupRequire() {
 
 		modPath := call.Arguments[0].String()
 
+		if modPath == "fs" {
+			exports := r.vm.NewObject()
+
+			exports.Set("readFileSync", func(call goja.FunctionCall) goja.Value {
+				if len(call.Arguments) < 1 {
+					panic(r.vm.ToValue("fs.readFileSync needs at least 1 argument"))
+				}
+
+				filePath := call.Arguments[0].String()
+				encoding := "utf-8"
+				if len(call.Arguments) > 1 {
+					encoding = call.Arguments[1].String()
+				}
+
+				data, err := os.ReadFile(filePath)
+				if err != nil {
+					panic(r.vm.ToValue("readFileSync error: " + err.Error()))
+				}
+
+				// Support only utf-8 for now
+				if encoding == "utf-8" || encoding == "utf8" {
+					return r.vm.ToValue(string(data))
+				} else {
+					panic(r.vm.ToValue("Only utf-8 encoding supported for now"))
+				}
+			})
+
+			exports.Set("writeFileSync", func(call goja.FunctionCall) goja.Value {
+				if len(call.Arguments) < 2 {
+					r.vm.ToValue("Not suffient arguments for writeFileSync")
+				}
+
+				path := call.Argument(0).String()
+				data := call.Argument(1).String()
+
+				encoding := "utf-8"
+				if len(call.Arguments) >= 3 {
+					encoding = call.Argument(2).String()
+				}
+
+				if encoding != "utf-8" {
+					panic(r.vm.ToValue("Only utf-8 encoding is supported for now"))
+				}
+
+				err := os.WriteFile(path, []byte(data), 0644)
+				if err != nil {
+					panic(r.vm.ToValue(fmt.Sprintf("writeFileSync error: %v", err)))
+				}
+
+				return goja.Undefined()
+			})
+
+			return exports
+		}
+
 		absPath, err := filepath.Abs(modPath)
 		if err != nil {
 			panic(r.vm.ToValue("Invalid path: " + err.Error()))
