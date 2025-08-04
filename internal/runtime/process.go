@@ -20,7 +20,7 @@ func (r *JSRuntime) initProcess() {
 
 	argv := []string{}
 	for _, arg := range os.Args {
-		argv = append(argv, arg)
+		argv = append(argv, arg+"\n")
 	}
 	process.Set("argv", r.vm.ToValue(argv))
 
@@ -28,7 +28,7 @@ func (r *JSRuntime) initProcess() {
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
 		if len(parts) == 2 {
-			envObj.Set(parts[0], parts[1])
+			envObj.Set(parts[0], parts[1]+"\n")
 		}
 	}
 	process.Set("env", envObj)

@@ -44,5 +44,6 @@
 // // log('end');
 
 // let pro = process.cwd();
-// console.log(process.env());
-console.log('argv:', process.exit);
+console.log(process.env);
+console.log(process.argv);
+// console.log('argv:', process.exit);
