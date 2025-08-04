@@ -1,4 +1,10 @@
 const log = require('./test/logger.js');
+const fs = require('fs');
+const message = 'Hello boys';
+fs.writeFileSync('./test/output.txt', message, 'utf-8');
+const data = fs.readFileSync('./test/output.txt', 'utf8');
+// console.warn(data);
+
 // log('start');
 
 i = 0;
