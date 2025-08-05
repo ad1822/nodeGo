@@ -12,6 +12,11 @@ type Module struct {
 	loaded  bool
 }
 
+type EventEmitter struct {
+	vm     *goja.Runtime
+	events map[string][]goja.Callable
+}
+
 type JSRuntime struct {
 	vm             *goja.Runtime
 	taskQueue      chan func() // Chan is for channel
@@ -21,6 +26,7 @@ type JSRuntime struct {
 	nextTimerId    int
 	activeTimers   map[int]bool
 	moduleCache    map[string]*Module
+	eventEmitter   map[string]*EventEmitter
 }
 
 // Have to exist explicitly
@@ -82,6 +88,7 @@ func New() *JSRuntime {
 		nextTimerId:    0,
 		activeTimers:   make(map[int]bool),
 		moduleCache:    make(map[string]*Module),
+		eventEmitter:   make(map[string]*EventEmitter),
 	}
 	r.initConsole()
 	r.initNextTickQueue()
@@ -90,6 +97,7 @@ func New() *JSRuntime {
 	r.initTimers()
 	r.setupRequire()
 	r.initProcess()
+	r.initEventEmitter()
 	// r.setupFSModule()
 	// r.initClearTimers()
 	return r

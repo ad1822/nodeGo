@@ -44,6 +44,17 @@
 // // log('end');
 
 // let pro = process.cwd();
-console.log(process.env);
-console.log(process.argv);
+// console.log(process.env);
+// console.log(process.argv);
 // console.log('argv:', process.exit);
+
+const e = new EventEmitter();
+
+function listener(msg) {
+  console.log('Received:', msg);
+}
+
+e.on('greet', listener);
+e.emit('greet', 'Ayush'); // → Received: Ayush
+// e.off('greet', listener);
+e.emit('greet', 'again?'); // → (no output)
