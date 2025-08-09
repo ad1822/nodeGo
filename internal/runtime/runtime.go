@@ -14,7 +14,7 @@ type Module struct {
 
 type EventEmitter struct {
 	vm     *goja.Runtime
-	events map[string][]goja.Callable
+	events map[string][]goja.Value
 }
 
 type JSRuntime struct {
@@ -98,8 +98,7 @@ func New() *JSRuntime {
 	r.setupRequire()
 	r.initProcess()
 	r.initEventEmitter()
-	// r.setupFSModule()
-	// r.initClearTimers()
+
 	return r
 }
 

@@ -1,11 +1,15 @@
 package runtime
 
-import "github.com/dop251/goja"
+import (
+	"fmt"
+
+	"github.com/dop251/goja"
+)
 
 func NewEventEmitter(vm *goja.Runtime) *EventEmitter {
 	return &EventEmitter{
 		vm:     vm,
-		events: make(map[string][]goja.Callable),
+		events: make(map[string][]goja.Value),
 	}
 }
 
@@ -15,9 +19,9 @@ func (e *EventEmitter) On(call goja.FunctionCall) goja.Value {
 	}
 
 	event := call.Argument(0).String()
-	fn, ok := goja.AssertFunction(call.Argument(1))
-	if !ok {
-		panic(e.vm.ToValue("Event listener must be a function"))
+	fn := call.Argument(1)
+	if _, ok := goja.AssertFunction(fn); !ok {
+		return goja.Undefined()
 	}
 
 	e.events[event] = append(e.events[event], fn)
@@ -38,37 +42,34 @@ func (e *EventEmitter) Emit(call goja.FunctionCall) goja.Value {
 	}
 
 	for _, fn := range listeners {
-		_, err := fn(goja.Undefined(), args...)
+		cb, _ := goja.AssertFunction(fn)
+		_, err := cb(goja.Undefined(), args...)
 		if err != nil {
-			panic(err)
+			fmt.Println("[Go] listener error:", err)
 		}
 	}
 
 	return goja.Undefined()
 }
 
-// func (e *EventEmitter) Off(call goja.FunctionCall) goja.Value {
-// 	if len(call.Arguments) < 2 {
-// 		return goja.Undefined()
-// 	}
+func (e *EventEmitter) Off(call goja.FunctionCall) goja.Value {
+	if len(call.Arguments) < 2 {
+		return goja.Undefined()
+	}
 
-// 	event := call.Argument(0).String()
-// 	targetFn, ok := goja.AssertFunction(call.Argument(1))
-// 	if !ok {
-// 		return goja.Undefined()
-// 	}
+	event := call.Argument(0).String()
+	target := call.Argument(1)
+	listeners := e.events[event]
+	for i, fn := range listeners {
+		if fn.Equals(target) { // JS === comparison
+			listeners = append(listeners[:i], listeners[i+1:]...)
+			break
+		}
+	}
+	e.events[event] = listeners
+	return goja.Undefined()
 
-// 	current := e.events[event]
-// 	filtered := []goja.Callable{}
-
-// 	for _, fn := range current {
-// 		if !e.vm.StrictEquals(fn, targetFn) {
-// 		}
-// 	}
-
-// 	e.events[event] = filtered
-// 	return goja.Undefined()
-// }
+}
 
 func (r *JSRuntime) initEventEmitter() {
 	// class := r.vm.NewObject()
@@ -80,7 +81,7 @@ func (r *JSRuntime) initEventEmitter() {
 
 		obj.Set("on", emitter.On)
 		obj.Set("emit", emitter.Emit)
-		// obj.Set("off", emitter.Off) // optional
+		obj.Set("off", emitter.Off) // optional
 
 		return obj
 	}
