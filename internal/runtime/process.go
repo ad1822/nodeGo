@@ -10,6 +10,7 @@ import (
 func (r *JSRuntime) initProcess() {
 	process := r.vm.NewObject()
 
+	// cwd API
 	process.Set("cwd", func(goja.FunctionCall) goja.Value {
 		dir, err := os.Getwd()
 		if err != nil {

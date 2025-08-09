@@ -7,6 +7,7 @@ import (
 	"github.com/dop251/goja"
 )
 
+// Set timers (setTimeout, setInterval) APIS
 func (r *JSRuntime) initTimers() {
 	r.vm.Set("setTimeout", func(call goja.FunctionCall) goja.Value {
 		r.nextTimerId++
@@ -30,25 +31,24 @@ func (r *JSRuntime) initTimers() {
 		delay := call.Arguments[1].ToInteger()
 
 		go func() {
+			// Set delay for that particular time
 			time.Sleep(time.Duration(delay) * time.Millisecond)
-			// fmt.Println("[Go] Timeout finished, pushing callback to taskQueue")
 
+			// Append that function in taskQueue
 			r.taskQueue <- func() {
-				// fmt.Println("[Go] Executing setTimeout callback from taskQueue")
 				_, err := cb(goja.Undefined())
 				if err != nil {
 					fmt.Println("[Go] Error in callback:", err)
 				}
 			}
 
-			// fmt.Println("[Go] Callback pushed successfully")
 		}()
 
 		return r.vm.ToValue(id)
 
 	})
 
-	// Set Interval method in JS
+	// setInterval API
 	r.vm.Set("setInterval", func(call goja.FunctionCall) goja.Value {
 		r.nextTimerId++
 		id := r.nextTimerId
