@@ -98,6 +98,9 @@ func New() *JSRuntime {
 	r.setupRequire()
 	r.initProcess()
 	r.initEventEmitter()
+	r.initNet()
+	// r.createServer()
+	// r.connectClient()
 
 	return r
 }
