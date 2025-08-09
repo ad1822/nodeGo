@@ -1,4 +1,4 @@
-let pro = process.cwd();
-console.log(process.env);
+// let pro = process.cwd();
+// console.log(process.env);
 console.log(process.argv);
-console.log('argv:', process.exit);
+// console.log('argv:', process.exit);

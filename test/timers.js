@@ -1,3 +1,5 @@
+const log = require('./test/logger.js');
+let i = 0;
 let id2 = setTimeout(() => {
   log('Timeout');
 }, 2000);

@@ -1,3 +1,5 @@
+const log = require('./test/logger.js');
+
 queueMicrotask(() => {
   log('microtask 1');
 });
