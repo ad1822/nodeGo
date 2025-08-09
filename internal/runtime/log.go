@@ -6,8 +6,12 @@ import (
 	"github.com/dop251/goja"
 )
 
+// JavaScript Console API
 func (r *JSRuntime) initConsole() {
+
 	console := map[string]func(goja.FunctionCall) goja.Value{
+
+		// log API (console.log)
 		"log": func(call goja.FunctionCall) goja.Value {
 			for _, arg := range call.Arguments {
 				fmt.Print(arg.Export(), " ")
